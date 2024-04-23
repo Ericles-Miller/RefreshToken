@@ -1,5 +1,6 @@
+import { AuthenticateUserUseCase } from "@controllers/Authenticated/AuthenticatedUseCase";
 import { UsersService } from "@controllers/UsersService";
-import { Posts, PrismaClient, Users } from "@prisma/client";
+import { PrismaClient, Users } from "@prisma/client";
 import { BaseRepository } from "@repositories/BaseRepository";
 import { IUsersRepository } from "@repositories/IUsersRepository";
 import { UsersRepository } from "@repositories/UsersRepository";
@@ -14,3 +15,4 @@ container.bind<BaseRepository<Users>>('UsersRepository').to(UsersRepository)
 container.bind<PrismaClient>('PrismaClient').toConstantValue(prisma);
 
 container.bind<UsersService>(UsersService).toSelf()
+container.bind<AuthenticateUserUseCase>(AuthenticateUserUseCase).toSelf()

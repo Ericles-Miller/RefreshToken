@@ -4,12 +4,14 @@ import { AppError } from "@shared/errors/AppError";
 import { inject, injectable } from "inversify";
 import { UsersRepository } from "@repositories/UsersRepository";
 import { IUsersRepository } from "@repositories/IUsersRepository";
+import { GenerateRefreshToken } from "provider/GenerateRefreshToken";
 
 interface IResponse {
-  user: {
-    name: string;
-    email: string;
-  };
+  refreshToken: {
+    id: string;
+    expiresIn: number;
+    userId: string;
+  },
   token: string;
 }
 
@@ -31,20 +33,14 @@ export class AuthenticateUserUseCase {
       throw new AppError("Email or password incorrect!");
     }
 
-    const token = sign({}, "40fe3ccb6f87eb4cf80f3c5dda631e2f", { // tambem pode ser gerado outro id aqui
-      // chave do token
+    const token = sign({}, "40fe3ccb6f87eb4cf80f3c5dda631e2f", { 
       subject: user.id, // relaciona ao id
       expiresIn: "5m", // tempo para expirar
     });
 
-    const tokenReturn: IResponse = {
-      token,
-      user: {
-        name: user.name,
-        email: user.email,
-      },
-    };
-
-    return tokenReturn;
+    const generateRefreshToken = new GenerateRefreshToken()
+    const refreshToken = await generateRefreshToken.execute(user.id)
+    
+    return {token, refreshToken};
   }
 }
