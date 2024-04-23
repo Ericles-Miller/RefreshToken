@@ -5,6 +5,7 @@ import { inject, injectable } from "inversify";
 import { UsersRepository } from "@repositories/UsersRepository";
 import { IUsersRepository } from "@repositories/IUsersRepository";
 import { GenerateRefreshToken } from "provider/GenerateRefreshToken";
+import { GenerateTokenProvider } from "provider/GenerateTokenProvider";
 
 interface IResponse {
   refreshToken: {
@@ -33,10 +34,8 @@ export class AuthenticateUserUseCase {
       throw new AppError("Email or password incorrect!");
     }
 
-    const token = sign({}, "40fe3ccb6f87eb4cf80f3c5dda631e2f", { 
-      subject: user.id, // relaciona ao id
-      expiresIn: "5m", // tempo para expirar
-    });
+    const generateTokenProvider = new GenerateTokenProvider();
+    const token = await generateTokenProvider.execute(user.id)
 
     const generateRefreshToken = new GenerateRefreshToken()
     const refreshToken = await generateRefreshToken.execute(user.id)
