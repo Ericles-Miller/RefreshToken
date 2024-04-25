@@ -1,9 +1,12 @@
+import { GenerateRefreshToken } from "@Middlewares/provider/GenerateRefreshToken";
+import { GenerateTokenProvider } from "@Middlewares/provider/GenerateTokenProvider";
+import { RefreshTokens } from "@prisma/client";
+import { IRefreshTokenRepository } from "@repositories/IRefreshTokenRepository";
+import { RefreshTokenRepository } from "@repositories/RefreshTokenRepository";
 import { AppError } from "@shared/errors/AppError";
-import { prisma } from "@shared/infra/database";
+import { container } from "@shared/IoC";
 import { isPast } from "date-fns";
-import { injectable } from "inversify";
-import { GenerateRefreshToken } from "Middlewares/provider/GenerateRefreshToken";
-import { GenerateTokenProvider } from "Middlewares/provider/GenerateTokenProvider";
+import { inject, injectable } from "inversify";
 
 export interface IResponseRefreshToken {
   token: string,
@@ -16,11 +19,14 @@ export interface IResponseRefreshToken {
 
 @injectable()
 export class RefreshTokenUserUseCase {
-  async execute(tokenId: string): Promise<IResponseRefreshToken> {
-    const refreshToken = await prisma.refreshToken.findFirst({
-      where: { id: tokenId },
-    });
+  constructor(
+    @inject(RefreshTokenRepository)
+    private refreshTokenRepository : IRefreshTokenRepository,
+  ) {}
 
+
+  async execute(tokenId: string): Promise<IResponseRefreshToken> {
+    const refreshToken : RefreshTokens = await this.refreshTokenRepository.findById(tokenId);
     if(!refreshToken) {
       throw new AppError('Token invalid!', 404);
     }
@@ -29,11 +35,9 @@ export class RefreshTokenUserUseCase {
 
     const dateToCheck = refreshToken.expiresIn * 1000;
     if(isPast(dateToCheck)) {
-      await prisma.refreshToken.deleteMany({
-        where: { userId: refreshToken.userId}
-      });
+      await this.refreshTokenRepository.delete(refreshToken.userId);
 
-      const generateTokenProvider = new GenerateRefreshToken();
+      const generateTokenProvider = container.get(GenerateRefreshToken);
       const newRefreshToken = await generateTokenProvider.execute(refreshToken.userId);
 
       return { token, newRefreshToken}
