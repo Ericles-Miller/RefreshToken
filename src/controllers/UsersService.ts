@@ -2,6 +2,7 @@ import { User } from "@entities/User";
 import { Users } from "@prisma/client";
 import { IUsersRepository } from "@repositories/IUsersRepository";
 import { AppError } from "@shared/errors/AppError";
+import { hash } from "bcryptjs";
 import { inject, injectable } from "inversify";
 
 interface IRequestDTO {
@@ -25,8 +26,11 @@ export class UsersService {
     if(userAlreadyExists) {
       throw new AppError('user already exists with email!', 400);
     }
+
+    const passwordHash = await hash(password, 8);
     
-    const user = new User(name, email, password);    
+    
+    const user = new User(name, email, passwordHash);    
     await this.usersRepository.create(user);
   }
 

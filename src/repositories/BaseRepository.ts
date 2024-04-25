@@ -1,10 +1,10 @@
 import { injectable } from "inversify";
 import { IBaseRepository } from "./IBaseRepository";
-import { Users, Posts } from "@prisma/client";
+import { RefreshTokens, Users } from "@prisma/client";
 import { RepositoryType } from "@shared/infra/database";
 
 @injectable()
-export class BaseRepository<T extends Users | Posts> implements IBaseRepository<T> {
+export class BaseRepository<T extends Users | RefreshTokens> implements IBaseRepository<T> {
   protected readonly repository: RepositoryType<T>;
 
   constructor(repository: RepositoryType<T> ) {  
@@ -21,11 +21,10 @@ export class BaseRepository<T extends Users | Posts> implements IBaseRepository<
     return context;
   }
 
-  async create(data: T): Promise<void> {
-    
-    await this.repository.create({
-      data,
-    });
+  async create(data: T): Promise<T> {
+    const object = await this.repository.create({ data });
+
+    return object;
   }
 
   async listAll(): Promise<T[]> {
