@@ -2,8 +2,8 @@ import { AppError } from "@shared/errors/AppError";
 import { prisma } from "@shared/infra/database";
 import { isPast } from "date-fns";
 import { injectable } from "inversify";
-import { GenerateRefreshToken } from "provider/GenerateRefreshToken";
-import { GenerateTokenProvider } from "provider/GenerateTokenProvider";
+import { GenerateRefreshToken } from "Middlewares/provider/GenerateRefreshToken";
+import { GenerateTokenProvider } from "Middlewares/provider/GenerateTokenProvider";
 
 export interface IResponseRefreshToken {
   token: string,

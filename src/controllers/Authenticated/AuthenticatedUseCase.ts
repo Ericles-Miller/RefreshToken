@@ -4,8 +4,8 @@ import { AppError } from "@shared/errors/AppError";
 import { inject, injectable } from "inversify";
 import { UsersRepository } from "@repositories/UsersRepository";
 import { IUsersRepository } from "@repositories/IUsersRepository";
-import { GenerateRefreshToken } from "provider/GenerateRefreshToken";
-import { GenerateTokenProvider } from "provider/GenerateTokenProvider";
+import { GenerateRefreshToken } from "Middlewares/provider/GenerateRefreshToken";
+import { GenerateTokenProvider } from "Middlewares/provider/GenerateTokenProvider";
 
 interface IResponse {
   refreshToken: {
